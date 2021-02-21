@@ -1,6 +1,6 @@
 debug = False
-single_circuit = False
-update_gui = False
+single_circuit = True
+update_gui = True
 
 debug_log = open("logs/debug_log.txt", "a+")
 
@@ -41,12 +41,18 @@ display_delay = 0
 graph_delay = 2000
 
 start_temperature = 100
-temperature_rate = 0.95
+temperature_rate = 0.5
 
 exit_criteria = "multiple_no_improvement"
 exit_temperature = 0
 exit_iterations = 10
 
 n_moves = 20
-dynamic_n_moves = True
+dynamic_n_moves = False
 k_n_moves = 1
+
+range_window = False
+window_size = 0.1
+
+shuffle = True
+ripple = False

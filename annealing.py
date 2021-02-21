@@ -169,45 +169,57 @@ class SimAnneal:
         
     def anneal(self):
         
+        accepted_swap = 0
         for i in range(self.n_moves):
             self.iteration += 1
             temp_placement = copy.deepcopy(self.cells)
             
             # Choose random cells to swap
-            cells = list(range(0, self.configs["cells"] + 1))
+            cells = list(range(0, self.configs["cells"]))
+            
             cell1 = random.choice(cells)
+            cell1_xy = self.cells[cell1]
             cells.remove(cell1)
-            cell2 = random.choice(cells)
             
-            # If swapping with empty cell
-            if cell1 == self.configs["cells"]:
-                cell1 = np.NaN
-                while True:
-                    x = random.randint(0, self.configs["cols"]-1)
-                    y = random.randint(0, self.configs["rows"]-1)
-                    
-                    # Check that the block is currently empty
-                    if np.isnan(self.placement[x, y]):
-                        cell1_xy = (x, y)
-                        break
-                        
-            # Get currrent location of cells
-            else:
-                cell1_xy = self.cells[cell1]
+            # Add in possibility of empty cell
+            cells.append(self.configs["cells"])
+            
+            # Choose another cell within the range
+            if range_window:
+                window_x = round(window_size*self.configs["cols"])
+                window_y = round(window_size*self.configs["rows"])
+                x_min = 0 if cell1_xy[0] - window_x < 0 else cell1_xy[0] - window_x
+                x_max = self.configs["cols"]-1 if cell1_xy[0] + window_x >= self.configs["cols"] else cell1_xy[0] + window_x
+                y_min = 0 if cell1_xy[1] - window_y < 0 else cell1_xy[1] - window_y
+                y_max = self.configs["rows"]-1 if cell1_xy[1] + window_y >= self.configs["rows"] else cell1_xy[1] + window_y
                 
-            if cell2 == self.configs["cells"]:
-                cell2 = np.NaN
-                while True:
-                    x = random.randint(0, self.configs["cols"]-1)
-                    y = random.randint(0, self.configs["rows"]-1)
-                    
-                    # Check that the block is currently empty
-                    if np.isnan(self.placement[x, y]):
-                        cell2_xy = (x, y)
-                        break
+                debug_print("Cell1: ({x}, {y}) -> range ({xmin}-{xmax}, {ymin}-{ymax})".format(x=cell1_xy[0], y=cell1_xy[1], xmin=x_min, xmax=x_max, ymin=y_min, ymax=y_max))
+                
+                cell2_xy = (random.randint(x_min, x_max), random.randint(y_min, y_max))
+                
+                # Make sure the swap isn't with itself
+                while cell2_xy == cell1_xy:
+                    cell2_xy = (random.randint(x_min, x_max), random.randint(y_min, y_max))
+                
+                cell2 = self.placement[cell2_xy]
+            # Choose any cell
             else:
-                cell2_xy = self.cells[cell2]
-            
+                cell2 = random.choice(cells)
+                
+            if not range_window:
+                if cell2 == self.configs["cells"]:
+                    cell2 = np.NaN
+                    while True:
+                        x = random.randint(0, self.configs["cols"]-1)
+                        y = random.randint(0, self.configs["rows"]-1)
+                        
+                        # Check that the block is currently empty
+                        if np.isnan(self.placement[x, y]):
+                            cell2_xy = (x, y)
+                            break
+                else:
+                    cell2_xy = self.cells[cell2]
+                
             debug_print("Swapping cell {c1} ({x1}, {y1}) with cell {c2} ({x2}, {y2})".format(c1=cell1, c2=cell2, x1=cell1_xy[0], y1=cell1_xy[1], x2=cell2_xy[0], y2=cell2_xy[1]))
             
             # Update placement
@@ -221,6 +233,7 @@ class SimAnneal:
             
             if self.delta_cost < 0:
                 self.update_swap(cell1, cell2, cell1_xy, cell2_xy)
+                accepted_swap += 1
                 
             elif self.temperature != 0:
                 # Check if swap should happen
@@ -231,6 +244,7 @@ class SimAnneal:
                 if (r < update_threshold):
                     # Update
                     self.update_swap(cell1, cell2, cell1_xy, cell2_xy)
+                    accepted_swap += 1
                 else:
                     debug_print("Swap rejected")
                     
@@ -242,6 +256,8 @@ class SimAnneal:
             self.x.append(self.iteration)
             self.y.append(self.current_cost)
             
+            
+        debug_print("{}% accepted swaps".format(float(accepted_swap) / self.n_moves))
         self.temperature = self.temperature * temperature_rate
         if self.temperature < 0.1:
             self.temperature = 0
