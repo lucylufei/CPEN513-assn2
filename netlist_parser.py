@@ -17,14 +17,21 @@ def parse_file(filename):
     
     nets = []
     
-    for i in range(configs["nets"]):
+    n = 0
+    while True:
         cells = []
         line = f.readline().strip().split(" ")
-        
+        if len(line) <= 1:
+            continue
+        else:
+            n += 1
+            
         for cell in line[1:]:
             cells.append(int(cell))
             
         nets.append(cells)
+        if n >= configs["nets"]:
+            break
         
     if debug:
         print("Nets:")

@@ -32,11 +32,9 @@ class SimAnneal:
         
         self.ax = ax
         
-    def animate(self, frame):
+    def animate(self, frame=None):
         if self.initalized:
             self.ax.clear()
-            self.x.append(self.iteration)
-            self.y.append(self.current_cost)
             self.ax.plot(self.x, self.y)
         
     def random_placement(self):
@@ -192,10 +190,16 @@ class SimAnneal:
                 
             del temp_placement
             
+            self.x.append(self.iteration)
+            self.y.append(self.current_cost)
+            
         self.temperature = self.temperature * temperature_rate
         print("New temperature: {}".format(self.temperature))
             
             
     def full_anneal(self):
+        self.random_placement()
         while self.no_exit():
             self.anneal()
+            
+        self.animate()

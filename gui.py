@@ -11,7 +11,7 @@ from annealing import *
 
 
 # filename = input("Name of circuit: ")
-filename = "simpletest"
+filename = "cm151a"
 
 print("Reading configurations for {}...".format(filename))
 configs, nets = parse_file("./circuits/{}.txt".format(filename))
@@ -41,10 +41,12 @@ simulated_annealing = SimAnneal(c, configs, nets, ax)
 button_frame = Frame(root, width=screensize["width"])
 place_button = Button(button_frame, text ="Randomly Place", command=simulated_annealing.random_placement)
 it_button = Button(button_frame, text ="Iterate", command=simulated_annealing.anneal)
+anneal_button = Button(button_frame, text ="Run Simulated Annealing", command=simulated_annealing.full_anneal)
 
 button_frame.grid(row=1, column=0)
 place_button.grid(row=0, column=0)
 it_button.grid(row=0, column=1)
+anneal_button.grid(row=0, column=2)
 
 graphFrame = Frame(root, width=screensize["width"])
 graphFrame.grid(row=0, column=1)
