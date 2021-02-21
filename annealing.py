@@ -24,16 +24,20 @@ class SimAnneal:
         self.cells = {}
         self.cost = {}
         self.new_cost = {}
+        self.current_cost = 0
         self.temperature = start_temperature
         
         self.iteration = 0
+        self.initalized = False
         
-        self.x = np.arange(0, 2*np.pi, 0.01) 
-        self.line, = ax.plot(self.x, np.sin(self.x))
+        self.ax = ax
         
-    def animate(self,i):
-        self.line.set_ydata(np.sin(self.x*i))  # update the data
-        return self.line,
+    def animate(self, frame):
+        if self.initalized:
+            self.ax.clear()
+            self.x.append(self.iteration)
+            self.y.append(self.current_cost)
+            self.ax.plot(self.x, self.y)
         
     def random_placement(self):
         # Reset all placement
@@ -56,6 +60,11 @@ class SimAnneal:
         self.draw_connections()
         self.update_labels()
         self.calculate_cost()
+        
+        self.initalized = True
+        self.x = [0]
+        self.y = [self.current_cost]
+        self.ax.plot(self.x, self.y)
 
                 
     def update_labels(self):
@@ -96,6 +105,7 @@ class SimAnneal:
     def update_cost(self):
         total_cost = sum(self.cost[i] for i in range(self.configs["nets"]))
         print("Total Cost: {}".format(total_cost))
+        self.current_cost = total_cost
         
     def no_exit(self):
         if exit_criteria == "temp":
