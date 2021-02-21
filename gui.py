@@ -20,7 +20,8 @@ if single_circuit:
     simulated_annealing.full_anneal()
 
 else:
-    results_log = open("logs/results__{}.txt".format(time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())), "w+")
+    results_file = "logs/results__{}.txt".format(time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()))
+    results_log = open(results_file, "w+")
 
     results_log.write("\n\n{}\n".format("="*20))
     results_log.write(time.strftime("%Y-%m-%d %H:%M:%S\n", time.localtime()))
@@ -36,6 +37,10 @@ else:
     results_log.write("Moves Per Temperature: {}\n".format(n_moves))
     results_log.write("k (Moves Per Temperature): {}\n".format(k_n_moves))
     results_log.write("\n{}\n\n".format("*"*50))
+
+    results_log.close()
+    results_log = open(results_file, "a")
+
 
     circuits = [name for name in os.listdir("./circuits")]
 
@@ -57,6 +62,7 @@ else:
         
         results_log.write("{circuit}\t{cost}\n".format(circuit=circuit.replace(".txt", ""), cost=cost))
 
+    results_log.write("Finished at {}\n".format(time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())))
 
     print("Final Average Cost: {}".format(float(cumulative_cost) / len(circuits)))
     results_log.write("\nFinal Average Cost: {}\n".format(float(cumulative_cost) / len(circuits)))

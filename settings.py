@@ -43,7 +43,7 @@ display_delay = 0
 graph_delay = 2000
 
 start_temperature = 100
-temperature_rate = 0.7
+temperature_rate = 0.9
 
 exit_criteria = "multiple_no_improvement"
 exit_temperature = 0
@@ -51,4 +51,4 @@ exit_iterations = 10
 
 n_moves = 40
 dynamic_n_moves = True
-k_n_moves = 1
+k_n_moves = 2
