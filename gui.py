@@ -74,7 +74,7 @@ if single_circuit:
     root.mainloop()
     
 else:
-    results_log = open("logs/results__{}.txt".format(time.strftime("%Y-%m-%d_%H-%M", time.localtime())), "w+")
+    results_log = open("logs/results__{}.txt".format(time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())), "w+")
 
     results_log.write("\n\n{}\n".format("="*20))
     results_log.write(time.strftime("%Y-%m-%d %H:%M:%S\n", time.localtime()))
