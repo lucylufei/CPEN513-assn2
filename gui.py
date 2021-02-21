@@ -67,7 +67,7 @@ if single_circuit:
     graph = FigureCanvasTkAgg(fig, graphFrame)
     graph.draw()
     graph.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
-    ani = FuncAnimation(fig, simulated_annealing.animate, np.arange(1, 200), interval=200, blit=False)
+    ani = FuncAnimation(fig, simulated_annealing.animate, np.arange(1, 200), interval=graph_delay, blit=False)
 
 
     # Run GUI
@@ -110,7 +110,7 @@ else:
 
     simulated_annealing = SimAnneal(c, ax)
 
-    ani = FuncAnimation(fig, simulated_annealing.animate, np.arange(1, 200), interval=200, blit=False)
+    ani = FuncAnimation(fig, simulated_annealing.animate, np.arange(1, 200), interval=graph_delay, blit=False)
     
     cumulative_cost = 0
     print("Running simulated annealing for {} benchmark circuits.".format(len(circuits)))
@@ -144,6 +144,8 @@ else:
         cumulative_cost += cost
         
         results_log.write("{circuit}\t{cost}\n".format(circuit=circuit.replace(".txt", ""), cost=cost))
+        
+        c.postscript(file="photos/{circuit}_{time}.ps".format(circuit=circuit.replace(".txt", ""), time=time.strftime("%Y-%m-%d_%H-%M", time.localtime())), colormode='color')
         
         c.delete("all")
 

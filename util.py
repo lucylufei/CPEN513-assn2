@@ -4,8 +4,9 @@ def debug_print(content):
     if debug:
         print(content)
     else:
-        debug_log.write(str(content))
-        debug_log.write("\n")
+        # debug_log.write(str(content))
+        # debug_log.write("\n")
+        pass
 
 def calculate_half_perimeter(net, cells):
     '''

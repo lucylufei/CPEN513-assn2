@@ -1,5 +1,6 @@
 debug = False
-single_circuit = True
+single_circuit = False
+update_gui = False
 
 debug_log = open("logs/debug_log.txt", "a+")
 
@@ -37,6 +38,7 @@ wire_colour_palette = [
 ]
 
 display_delay = 0
+graph_delay = 2000
 
 start_temperature = 100
 temperature_rate = 0.95
@@ -47,4 +49,4 @@ exit_iterations = 10
 
 n_moves = 20
 dynamic_n_moves = True
-k_n_moves = 20
+k_n_moves = 1

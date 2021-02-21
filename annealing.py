@@ -160,10 +160,12 @@ class SimAnneal:
         debug_print(self.placement)
         
         self.update_cost()
-        self.draw_connections()
-        self.update_labels()
         self.c.update()
-        time.sleep(display_delay)
+        
+        if update_gui:
+            self.draw_connections()
+            self.update_labels()
+            time.sleep(display_delay)
         
     def anneal(self):
         
@@ -244,6 +246,7 @@ class SimAnneal:
         if self.temperature < 0.1:
             self.temperature = 0
         debug_print("New temperature: {}".format(round(self.temperature, 2)))
+        
         self.c.delete("temp")
         self.c.create_text(
             grid["right"] - 100,
@@ -262,4 +265,7 @@ class SimAnneal:
             
         self.animate()
         print("Done! Cost = {}".format(self.current_cost))
+        self.draw_connections()
+        self.update_labels()
+        self.c.update()
         return self.current_cost
