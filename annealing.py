@@ -13,9 +13,8 @@ np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 
 class SimAnneal:
     
-    def __init__(self, canvas, ax):
-        self.c = canvas
-        self.ax = ax
+    def __init__(self):
+        pass
         
     def setup(self, configs, nets):
         self.configs = configs
@@ -37,24 +36,9 @@ class SimAnneal:
         else:
             self.n_moves = n_moves
         
-        self.c.create_text(
-            grid["right"] - 100,
-            20,
-            text="Temp: {}".format(round(self.temperature, 2)),
-            fill="black",
-            font=('Arial',20,'bold'),
-            tag="temp"
-        )
-        
         self.iteration = 0
         self.exit_tracker = 0
-        self.initalized = False
         
-    
-    def animate(self, frame=None):
-        if self.initalized:
-            self.ax.clear()
-            self.ax.plot(self.x, self.y)
         
     def random_placement(self):
         # Reset all placement
@@ -73,36 +57,7 @@ class SimAnneal:
         
         debug_print("Current Placement:")
         debug_print(self.placement)
-        
-        self.draw_connections()
-        self.update_labels()
         self.calculate_cost()
-        
-        self.initalized = True
-        self.x = [0]
-        self.y = [self.current_cost]
-        self.ax.plot(self.x, self.y)
-        self.ax.set_ylabel("Half Perimeter Cost")
-        self.ax.set_xlabel("Iteration")
-
-                
-    def update_labels(self):
-        self.c.delete("cell")
-        for cell in self.cells:
-            add_text(self.cells[cell][0], self.cells[cell][1], self.c, grid, cell, tag="cell")
-        
-        
-    def draw_connections(self):
-        self.c.delete("wires")
-        for i, net in enumerate(self.nets):
-            for cell in net[1:]:
-                orig = self.cells[net[0]]
-                dest = self.cells[cell]
-                if line_curve:
-                    draw_line(orig, dest, self.c, grid, colour=wire_colour_palette[i % len(wire_colour_palette)], tag="wires", extra_point=i)
-                else:
-                    draw_line(orig, dest, self.c, grid, colour=wire_colour_palette[i % len(wire_colour_palette)], tag="wires")
-        
             
     def calculate_cost(self):
         
@@ -160,12 +115,6 @@ class SimAnneal:
         debug_print(self.placement)
         
         self.update_cost()
-        self.c.update()
-        
-        if update_gui:
-            self.draw_connections()
-            self.update_labels()
-            time.sleep(display_delay)
         
     def anneal(self):
         
@@ -239,23 +188,11 @@ class SimAnneal:
                 
             del temp_placement
             
-            self.x.append(self.iteration)
-            self.y.append(self.current_cost)
             
         self.temperature = self.temperature * temperature_rate
         if self.temperature < 0.1:
             self.temperature = 0
         debug_print("New temperature: {}".format(round(self.temperature, 2)))
-        
-        self.c.delete("temp")
-        self.c.create_text(
-            grid["right"] - 100,
-            20,
-            text="Temp: {}".format(round(self.temperature, 2)),
-            fill="black",
-            font=('Arial',20,'bold'),
-            tag="temp"
-        )
             
             
     def full_anneal(self):
@@ -263,9 +200,5 @@ class SimAnneal:
         while self.no_exit():
             self.anneal()
             
-        self.animate()
         print("Done! Cost = {}".format(self.current_cost))
-        self.draw_connections()
-        self.update_labels()
-        self.c.update()
         return self.current_cost
