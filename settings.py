@@ -32,11 +32,12 @@ wire_colour_palette = [
     "yellow"
 ]
 
+display_delay = 0
 
 start_temperature = 100
-temperature_rate = 0.5
+temperature_rate = 0.8
 
 exit_criteria = "temp"
 exit_temperature = 5
 
-n_moves = 1
+n_moves = 5

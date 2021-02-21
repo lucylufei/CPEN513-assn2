@@ -4,6 +4,7 @@ from matplotlib.animation import FuncAnimation
 import random
 import copy
 import math
+import time
 from util import *
 from settings import *
 
@@ -124,6 +125,8 @@ class SimAnneal:
         self.update_cost()
         self.draw_connections()
         self.update_labels()
+        self.c.update()
+        time.sleep(display_delay)
         
     def anneal(self):
         
