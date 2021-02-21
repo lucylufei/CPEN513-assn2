@@ -11,7 +11,7 @@ def parse_file(filename):
     configs["cells"] = int(line.strip().split(" ")[0])
     configs["nets"] = int(line.strip().split(" ")[1])
     configs["rows"] = int(line.strip().split(" ")[2])
-    configs["cols"] = int(line.strip().split(" ")[2])
+    configs["cols"] = int(line.strip().split(" ")[3])
     
     print("{c} cells to be places in {r} x {col} (= {t}) grid with {n} nets.".format(c=configs["cells"], r=configs["rows"], col=configs["cols"], t=configs["rows"]*configs["cols"] ,n=configs["nets"]))
     

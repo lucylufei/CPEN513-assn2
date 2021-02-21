@@ -1,4 +1,5 @@
 debug = True
+single_circuit = False
 
 # GUI settings
 screensize = {
@@ -16,6 +17,7 @@ grid["bottom"] = screensize["height"] - canvas_border
 
 background_colour = "white"
 line_colour = "black"
+line_curve = False
 
 wire_colour_palette = [
     "pink",
@@ -38,6 +40,6 @@ start_temperature = 100
 temperature_rate = 0.8
 
 exit_criteria = "temp"
-exit_temperature = 5
+exit_temperature = 0
 
 n_moves = 5

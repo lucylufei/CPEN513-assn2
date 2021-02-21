@@ -13,12 +13,15 @@ np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 
 class SimAnneal:
     
-    def __init__(self, canvas, configs, nets, ax):
+    def __init__(self, canvas, ax):
         self.c = canvas
+        self.ax = ax
+        
+    def setup(self, configs, nets):
         self.configs = configs
         self.nets = nets
         
-        self.placement = np.zeros((configs["rows"], configs["cols"]))
+        self.placement = np.zeros((configs["cols"], configs["rows"]))
         self.placement[:] = np.NaN
         random.seed()
         
@@ -31,8 +34,7 @@ class SimAnneal:
         self.iteration = 0
         self.initalized = False
         
-        self.ax = ax
-        
+    
     def animate(self, frame=None):
         if self.initalized:
             self.ax.clear()
@@ -43,7 +45,7 @@ class SimAnneal:
         self.placement[:] = np.NaN
         
         # Make a list of possible coordinates
-        possible_placements = [(x, y) for x in range(0, self.configs["rows"]) for y in range(0, self.configs["cols"])]
+        possible_placements = [(x, y) for x in range(0, self.configs["cols"]) for y in range(0, self.configs["rows"])]
         
         for i in range(self.configs["cells"]):
             (x, y) = random.choice(possible_placements)
@@ -78,7 +80,10 @@ class SimAnneal:
             for cell in net[1:]:
                 orig = self.cells[net[0]]
                 dest = self.cells[cell]
-                draw_line(orig, dest, self.c, grid, colour=wire_colour_palette[i % len(wire_colour_palette)], tag="wires", extra_point=i)
+                if line_curve:
+                    draw_line(orig, dest, self.c, grid, colour=wire_colour_palette[i % len(wire_colour_palette)], tag="wires", extra_point=i)
+                else:
+                    draw_line(orig, dest, self.c, grid, colour=wire_colour_palette[i % len(wire_colour_palette)], tag="wires")
         
             
     def calculate_cost(self):
@@ -144,8 +149,8 @@ class SimAnneal:
             if cell1 == self.configs["cells"]:
                 cell1 = np.NaN
                 while True:
-                    x = random.randint(0, self.configs["rows"]-1)
-                    y = random.randint(0, self.configs["cols"]-1)
+                    x = random.randint(0, self.configs["cols"]-1)
+                    y = random.randint(0, self.configs["rows"]-1)
                     
                     # Check that the block is currently empty
                     if np.isnan(self.placement[x, y]):
@@ -159,8 +164,8 @@ class SimAnneal:
             if cell2 == self.configs["cells"]:
                 cell2 = np.NaN
                 while True:
-                    x = random.randint(0, self.configs["rows"]-1)
-                    y = random.randint(0, self.configs["cols"]-1)
+                    x = random.randint(0, self.configs["cols"]-1)
+                    y = random.randint(0, self.configs["rows"]-1)
                     
                     # Check that the block is currently empty
                     if np.isnan(self.placement[x, y]):
@@ -180,16 +185,20 @@ class SimAnneal:
             # Check updated cost
             delta_cost = self.calculate_delta_cost(cell1, cell2, temp_placement)
             
-            # Check if swap should happen
-            r = random.uniform(0, 1)
-            update_threshold = math.exp(-1 * delta_cost / self.temperature)
-            print("Update Threshold: {u} (r = {r})".format(u=update_threshold, r=r))
-            
-            if (r < update_threshold):
-                # Update
+            if delta_cost < 0:
                 self.update_swap(cell1, cell2, cell1_xy, cell2_xy)
+                
             else:
-                print("Swap rejected")
+                # Check if swap should happen
+                r = random.uniform(0, 1)
+                update_threshold = math.exp(-1 * delta_cost / self.temperature)
+                print("Update Threshold: {u} (r = {r})".format(u=update_threshold, r=r))
+                
+                if (r < update_threshold):
+                    # Update
+                    self.update_swap(cell1, cell2, cell1_xy, cell2_xy)
+                else:
+                    print("Swap rejected")
                 
             del temp_placement
             
@@ -197,6 +206,8 @@ class SimAnneal:
             self.y.append(self.current_cost)
             
         self.temperature = self.temperature * temperature_rate
+        if self.temperature < 0.1:
+            self.temperature = 0
         print("New temperature: {}".format(self.temperature))
             
             
@@ -206,3 +217,4 @@ class SimAnneal:
             self.anneal()
             
         self.animate()
+        return self.current_cost
