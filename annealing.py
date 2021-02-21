@@ -29,9 +29,25 @@ class SimAnneal:
         self.cost = {}
         self.new_cost = {}
         self.current_cost = 0
+        self.delta_cost = 0
         self.temperature = start_temperature
         
+        if dynamic_n_moves:
+            self.n_moves = round(k_n_moves * math.pow(configs["cells"], float(4)/3))
+        else:
+            self.n_moves = n_moves
+        
+        self.c.create_text(
+            grid["right"] - 100,
+            20,
+            text="Temp: {}".format(round(self.temperature, 2)),
+            fill="black",
+            font=('Arial',20,'bold'),
+            tag="temp"
+        )
+        
         self.iteration = 0
+        self.exit_tracker = 0
         self.initalized = False
         
     
@@ -55,8 +71,8 @@ class SimAnneal:
             
         assert len(self.cells) == self.configs["cells"]
         
-        print("Current Placement:")
-        print(self.placement)
+        debug_print("Current Placement:")
+        debug_print(self.placement)
         
         self.draw_connections()
         self.update_labels()
@@ -66,6 +82,8 @@ class SimAnneal:
         self.x = [0]
         self.y = [self.current_cost]
         self.ax.plot(self.x, self.y)
+        self.ax.set_ylabel("Half Perimeter Cost")
+        self.ax.set_xlabel("Iteration")
 
                 
     def update_labels(self):
@@ -103,17 +121,31 @@ class SimAnneal:
             else:
                 self.new_cost[i] = self.cost[i]
             
-        print("Delta Cost: {}".format(delta_cost))
+        debug_print("Delta Cost: {}".format(delta_cost))
         return delta_cost
         
     def update_cost(self):
         total_cost = sum(self.cost[i] for i in range(self.configs["nets"]))
-        print("Total Cost: {}".format(total_cost))
+        debug_print("Total Cost: {}".format(total_cost))
         self.current_cost = total_cost
         
     def no_exit(self):
         if exit_criteria == "temp":
             return self.temperature > exit_temperature
+            
+        elif exit_criteria == "no_improvement":
+            return self.delta_cost < 0 or self.temperature != 0
+            
+        elif exit_criteria == "multiple_no_improvement":
+            if self.delta_cost > 0 and self.temperature == 0:
+                self.exit_tracker += 1
+            else:
+                self.exit_tracker = 0
+            return self.exit_tracker < exit_iterations
+            
+            
+        else:
+            raise Exception
             
     def update_swap(self, cell1, cell2, cell1_xy, cell2_xy):
         self.placement[cell1_xy] = cell2
@@ -124,8 +156,8 @@ class SimAnneal:
             self.cells[cell1] = cell2_xy
         
         self.cost = copy.deepcopy(self.new_cost)
-        print("New Placement:")
-        print(self.placement)
+        debug_print("New Placement:")
+        debug_print(self.placement)
         
         self.update_cost()
         self.draw_connections()
@@ -135,7 +167,7 @@ class SimAnneal:
         
     def anneal(self):
         
-        for i in range(n_moves):
+        for i in range(self.n_moves):
             self.iteration += 1
             temp_placement = copy.deepcopy(self.cells)
             
@@ -174,7 +206,7 @@ class SimAnneal:
             else:
                 cell2_xy = self.cells[cell2]
             
-            print("Swapping cell {c1} ({x1}, {y1}) with cell {c2} ({x2}, {y2})".format(c1=cell1, c2=cell2, x1=cell1_xy[0], y1=cell1_xy[1], x2=cell2_xy[0], y2=cell2_xy[1]))
+            debug_print("Swapping cell {c1} ({x1}, {y1}) with cell {c2} ({x2}, {y2})".format(c1=cell1, c2=cell2, x1=cell1_xy[0], y1=cell1_xy[1], x2=cell2_xy[0], y2=cell2_xy[1]))
             
             # Update placement
             if not np.isnan(cell2):
@@ -183,22 +215,25 @@ class SimAnneal:
                 temp_placement[cell1] = cell2_xy
                 
             # Check updated cost
-            delta_cost = self.calculate_delta_cost(cell1, cell2, temp_placement)
+            self.delta_cost = self.calculate_delta_cost(cell1, cell2, temp_placement)
             
-            if delta_cost < 0:
+            if self.delta_cost < 0:
                 self.update_swap(cell1, cell2, cell1_xy, cell2_xy)
                 
-            else:
+            elif self.temperature != 0:
                 # Check if swap should happen
                 r = random.uniform(0, 1)
-                update_threshold = math.exp(-1 * delta_cost / self.temperature)
-                print("Update Threshold: {u} (r = {r})".format(u=update_threshold, r=r))
+                update_threshold = math.exp(-1 * self.delta_cost / self.temperature)
+                debug_print("Update Threshold: {u} (r = {r})".format(u=update_threshold, r=r))
                 
                 if (r < update_threshold):
                     # Update
                     self.update_swap(cell1, cell2, cell1_xy, cell2_xy)
                 else:
-                    print("Swap rejected")
+                    debug_print("Swap rejected")
+                    
+            else:
+                debug_print("Swap rejected")
                 
             del temp_placement
             
@@ -208,7 +243,16 @@ class SimAnneal:
         self.temperature = self.temperature * temperature_rate
         if self.temperature < 0.1:
             self.temperature = 0
-        print("New temperature: {}".format(self.temperature))
+        debug_print("New temperature: {}".format(round(self.temperature, 2)))
+        self.c.delete("temp")
+        self.c.create_text(
+            grid["right"] - 100,
+            20,
+            text="Temp: {}".format(round(self.temperature, 2)),
+            fill="black",
+            font=('Arial',20,'bold'),
+            tag="temp"
+        )
             
             
     def full_anneal(self):
@@ -217,4 +261,5 @@ class SimAnneal:
             self.anneal()
             
         self.animate()
+        print("Done! Cost = {}".format(self.current_cost))
         return self.current_cost

@@ -1,5 +1,7 @@
-debug = True
-single_circuit = False
+debug = False
+single_circuit = True
+
+debug_log = open("logs/debug_log.txt", "a+")
 
 # GUI settings
 screensize = {
@@ -37,9 +39,12 @@ wire_colour_palette = [
 display_delay = 0
 
 start_temperature = 100
-temperature_rate = 0.8
+temperature_rate = 0.95
 
-exit_criteria = "temp"
+exit_criteria = "multiple_no_improvement"
 exit_temperature = 0
+exit_iterations = 10
 
-n_moves = 5
+n_moves = 20
+dynamic_n_moves = True
+k_n_moves = 20

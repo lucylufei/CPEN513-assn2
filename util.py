@@ -1,4 +1,11 @@
+from settings import *
 
+def debug_print(content):
+    if debug:
+        print(content)
+    else:
+        debug_log.write(str(content))
+        debug_log.write("\n")
 
 def calculate_half_perimeter(net, cells):
     '''
@@ -30,7 +37,7 @@ def calculate_half_perimeter(net, cells):
     # Add in routing track (only in the vertical dimension)
     half_perimeter += (largest_y - smallest_y)
     
-    print("Half perimeter calculated from ({x1}, {y1}) to ({x2}, {y2}) = {h}".format(x1=smallest_x, y1=smallest_y, x2=largest_x, y2=largest_y, h=half_perimeter))
+    debug_print("Half perimeter calculated from ({x1}, {y1}) to ({x2}, {y2}) = {h}".format(x1=smallest_x, y1=smallest_y, x2=largest_x, y2=largest_y, h=half_perimeter))
     return half_perimeter
     
     

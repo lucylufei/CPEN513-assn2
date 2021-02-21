@@ -1,4 +1,5 @@
 from settings import *
+from util import *
 
 def parse_file(filename):
     
@@ -13,7 +14,7 @@ def parse_file(filename):
     configs["rows"] = int(line.strip().split(" ")[2])
     configs["cols"] = int(line.strip().split(" ")[3])
     
-    print("{c} cells to be places in {r} x {col} (= {t}) grid with {n} nets.".format(c=configs["cells"], r=configs["rows"], col=configs["cols"], t=configs["rows"]*configs["cols"] ,n=configs["nets"]))
+    debug_print("{c} cells to be places in {r} x {col} (= {t}) grid with {n} nets.".format(c=configs["cells"], r=configs["rows"], col=configs["cols"], t=configs["rows"]*configs["cols"] ,n=configs["nets"]))
     
     nets = []
     
@@ -33,9 +34,8 @@ def parse_file(filename):
         if n >= configs["nets"]:
             break
         
-    if debug:
-        print("Nets:")
-        print(nets)
+    debug_print("Nets:")
+    debug_print(nets)
         
     return configs, nets
     
