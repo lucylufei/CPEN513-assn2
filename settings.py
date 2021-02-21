@@ -57,5 +57,4 @@ range_window = True
 window_size = 0.3
 
 shuffle = False
-shuffle_window = (1, 1)
 ripple = False

@@ -36,6 +36,10 @@ else:
     results_log.write("Dynamic Moves Per Temperature: {}\n".format(dynamic_n_moves))
     results_log.write("Moves Per Temperature: {}\n".format(n_moves))
     results_log.write("k (Moves Per Temperature): {}\n".format(k_n_moves))
+    results_log.write("Range Window: {}\n".format(range_window))
+    results_log.write("Range Window Size: {}\n".format(window_size))
+    results_log.write("Shuffle: {}\n".format(shuffle))
+    results_log.write("Ripple: {}\n".format(ripple))
     results_log.write("\n{}\n\n".format("*"*50))
 
     results_log.close()
