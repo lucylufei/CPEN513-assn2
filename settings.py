@@ -1,8 +1,10 @@
+import time
+
 debug = False
 single_circuit = False
 update_gui = False
 
-debug_log = open("logs/debug_log.txt", "a+")
+debug_log = open("logs/debug_{}.txt".format(time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime())), "w+")
 
 # GUI settings
 screensize = {
@@ -41,12 +43,12 @@ display_delay = 0
 graph_delay = 2000
 
 start_temperature = 100
-temperature_rate = 0.95
+temperature_rate = 0.7
 
 exit_criteria = "multiple_no_improvement"
 exit_temperature = 0
 exit_iterations = 10
 
-n_moves = 20
+n_moves = 40
 dynamic_n_moves = True
 k_n_moves = 1
