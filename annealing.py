@@ -12,7 +12,7 @@ np.set_printoptions(threshold=np.inf, linewidth=np.inf)
 
 class SimAnneal:
     
-    def __init__(self, canvas, configs, nets):
+    def __init__(self, canvas, configs, nets, ax):
         self.c = canvas
         self.configs = configs
         self.nets = nets
@@ -28,6 +28,12 @@ class SimAnneal:
         
         self.iteration = 0
         
+        self.x = np.arange(0, 2*np.pi, 0.01) 
+        self.line, = ax.plot(self.x, np.sin(self.x))
+        
+    def animate(self,i):
+        self.line.set_ydata(np.sin(self.x*i))  # update the data
+        return self.line,
         
     def random_placement(self):
         # Reset all placement
