@@ -41,19 +41,19 @@ display_delay = 0
 graph_delay = 2000
 
 start_temperature = 100
-temperature_rate = 0.5
+temperature_rate = 0.9
 
 exit_criteria = "multiple_no_improvement"
 exit_temperature = 0
-exit_iterations = 10
+exit_iterations = 20
 
-n_moves = 2
+n_moves = 10
 dynamic_n_moves = False
 k_n_moves = 1
 
-range_window = False
-window_size = 0.1
+range_window = True
+window_size = 0.3
 
 shuffle = False
 shuffle_window = (1, 1)
-ripple = True
+ripple = False

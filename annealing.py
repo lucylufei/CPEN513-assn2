@@ -284,12 +284,46 @@ class SimAnneal:
                     
                 print(additional_cells)
                 
+            elif shuffle and not np.isnan(cell2):
+                possible_placements = [
+                    (cell2_xy[0] + 1, cell2_xy[1]),
+                    (cell2_xy[0] - 1, cell2_xy[1]),
+                    (cell2_xy[0], cell2_xy[1] + 1),
+                    (cell2_xy[0], cell2_xy[1] - 1),
+                ]
                 
+                cell3_xy = random.choice(possible_placements)
+                while True:
+                    try:
+                        cell3 = self.placement[cell3_xy]
+                        if np.isnan(cell3):
+                            break
+                        else:
+                            possible_placements.remove(cell3_xy)
+                    except IndexError:
+                        # Location is out of range
+                        possible_placements.remove(cell3_xy)
+                        
+                    if len(possible_placements) == 0:
+                        cell3_xy = cell1_xy
+                        break
+                    cell3_xy = random.choice(possible_placements)
+                
+                additional_cells = [{"cell": cell3, "cell_xy": cell3_xy}]
+                    
                 
             debug_print("Swapping cell {c1} ({x1}, {y1}) with cell {c2} ({x2}, {y2})".format(c1=cell1, c2=cell2, x1=cell1_xy[0], y1=cell1_xy[1], x2=cell2_xy[0], y2=cell2_xy[1]))
             
+            if shuffle and not np.isnan(cell2):
+                debug_print("Swapping cell {c1} ({x1}, {y1}) with cell {c2} ({x2}, {y2})".format(c1=cell2, c2=cell3, x1=cell2_xy[0], y1=cell2_xy[1], x2=additional_cells[0]["cell_xy"][0], y2=additional_cells[0]["cell_xy"][1]))
+                temp_placement[cell2] = cell3_xy
+                temp_placement[cell1] = cell2_xy
+            
+                # Check updated cost
+                self.delta_cost = self.calculate_delta_cost(cell1, cell2, temp_placement, additional_cells)
+                
             # Update placement
-            if ripple and not np.isnan(cell2):
+            elif ripple and not np.isnan(cell2):
                 temp_placement[cell1] = cell2_xy
                 
                 temp_placement[cell2] = additional_cells[0]["cell_xy"]
@@ -363,7 +397,10 @@ class SimAnneal:
             self.anneal()
             
         self.animate()
-        print("Done! Cost = {}".format(self.current_cost))
+        cost = self.current_cost
+        print("Done! Cost = {}".format(cost))
+        self.calculate_cost()
+        assert cost == self.current_cost
         self.draw_connections()
         self.update_labels()
         self.c.update()
