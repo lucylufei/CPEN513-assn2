@@ -114,10 +114,7 @@ class SimAnneal:
     def calculate_delta_cost(self, cell1, cell2, temp_placement, additional_cells=None):
         delta_cost = 0
         
-        for i, net in enumerate(self.nets):
-            
-            print(net)
-            
+        for i, net in enumerate(self.nets):            
             cost_updated = False
             if cell1 in net or cell2 in net:
                 self.new_cost[i] = calculate_half_perimeter(net, temp_placement)
@@ -128,7 +125,7 @@ class SimAnneal:
             elif additional_cells:
                 for cell in additional_cells:
                     if cell["cell"] in net:
-                        print("Cell {c} in net {n}".format(c=cell["cell"], n=net))
+                        debug_print("Cell {c} in net {n}".format(c=cell["cell"], n=net))
                         self.new_cost[i] = calculate_half_perimeter(net, temp_placement)
                         delta_cost += self.new_cost[i] - self.cost[i]
                         cost_updated = True
@@ -282,7 +279,7 @@ class SimAnneal:
                         
                     additional_cells.append({"cell": cell3, "cell_xy": cell3_xy})
                     
-                print(additional_cells)
+                debug_print(additional_cells)
                 
             elif shuffle and not np.isnan(cell2):
                 possible_placements = [
