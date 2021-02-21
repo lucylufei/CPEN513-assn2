@@ -1,4 +1,4 @@
-debug = False
+debug = True
 single_circuit = True
 update_gui = True
 
@@ -47,12 +47,13 @@ exit_criteria = "multiple_no_improvement"
 exit_temperature = 0
 exit_iterations = 10
 
-n_moves = 20
+n_moves = 2
 dynamic_n_moves = False
 k_n_moves = 1
 
 range_window = False
 window_size = 0.1
 
-shuffle = True
-ripple = False
+shuffle = False
+shuffle_window = (1, 1)
+ripple = True

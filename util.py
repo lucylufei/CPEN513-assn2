@@ -86,3 +86,11 @@ def draw_line(orig, dest, c, grid, colour="gray", tag="", extra_point=None):
             tag=tag,
             smooth=1
         )
+        
+        
+def check_add_cells(cell, additional_cells):
+    for additional_cell in additional_cells:
+        if additional_cell["cell"] == cell:
+            return True
+            
+    return False

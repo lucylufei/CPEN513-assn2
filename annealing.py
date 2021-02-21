@@ -111,14 +111,29 @@ class SimAnneal:
             
         self.update_cost()
             
-    def calculate_delta_cost(self, cell1, cell2, temp_placement):
+    def calculate_delta_cost(self, cell1, cell2, temp_placement, additional_cells=None):
         delta_cost = 0
         
         for i, net in enumerate(self.nets):
+            
+            print(net)
+            
+            cost_updated = False
             if cell1 in net or cell2 in net:
                 self.new_cost[i] = calculate_half_perimeter(net, temp_placement)
                 delta_cost += self.new_cost[i] - self.cost[i]
-            else:
+                cost_updated = True
+                
+            # If there are more than 2 cells that have been updated
+            elif additional_cells:
+                for cell in additional_cells:
+                    if cell["cell"] in net:
+                        print("Cell {c} in net {n}".format(c=cell["cell"], n=net))
+                        self.new_cost[i] = calculate_half_perimeter(net, temp_placement)
+                        delta_cost += self.new_cost[i] - self.cost[i]
+                        cost_updated = True
+                        
+            if not cost_updated:
                 self.new_cost[i] = self.cost[i]
             
         debug_print("Delta Cost: {}".format(delta_cost))
@@ -147,13 +162,23 @@ class SimAnneal:
         else:
             raise Exception
             
-    def update_swap(self, cell1, cell2, cell1_xy, cell2_xy):
-        self.placement[cell1_xy] = cell2
+    def update_swap(self, cell1, cell2, cell1_xy, cell2_xy, additional_cells=None):
         self.placement[cell2_xy] = cell1
-        if not np.isnan(cell2):
-            self.cells[cell2] = cell1_xy
         if not np.isnan(cell1):
             self.cells[cell1] = cell2_xy
+            
+        if additional_cells:
+            prev_cell = cell2
+            for additional_cell in additional_cells:
+                self.placement[additional_cell["cell_xy"]] = prev_cell
+                if not np.isnan(prev_cell):
+                    self.cells[prev_cell] = additional_cell["cell_xy"]
+                prev_cell = additional_cell["cell"]
+                    
+        else:
+            self.placement[cell1_xy] = cell2
+            if not np.isnan(cell2):
+                self.cells[cell2] = cell1_xy
         
         self.cost = copy.deepcopy(self.new_cost)
         debug_print("New Placement:")
@@ -220,19 +245,77 @@ class SimAnneal:
                 else:
                     cell2_xy = self.cells[cell2]
                 
+            if ripple and not np.isnan(cell2):
+                additional_cells = []
+                
+                window_x = round(window_size*self.configs["cols"])
+                window_y = round(window_size*self.configs["rows"])
+                x_min = 0 if cell2_xy[0] - window_x < 0 else cell2_xy[0] - window_x
+                x_max = self.configs["cols"]-1 if cell2_xy[0] + window_x >= self.configs["cols"] else cell2_xy[0] + window_x
+                y_min = 0 if cell2_xy[1] - window_y < 0 else cell2_xy[1] - window_y
+                y_max = self.configs["rows"]-1 if cell2_xy[1] + window_y >= self.configs["rows"] else cell2_xy[1] + window_y
+                
+                cell3_xy = (random.randint(x_min, x_max), random.randint(y_min, y_max))
+                
+                # Make sure the swap isn't with itself
+                while cell3_xy == cell2_xy:
+                    cell3_xy = (random.randint(x_min, x_max), random.randint(y_min, y_max))
+                    
+                cell3 = self.placement[cell3_xy]
+                additional_cells.append({"cell": cell3, "cell_xy": cell3_xy})
+                    
+                # Keep finding next cell until an empty spot is chosen
+                while not np.isnan(cell3):
+                    celln_xy = additional_cells[-1]["cell_xy"]
+                    
+                    x_min = 0 if celln_xy[0] - window_x < 0 else celln_xy[0] - window_x
+                    x_max = self.configs["cols"]-1 if celln_xy[0] + window_x >= self.configs["cols"] else celln_xy[0] + window_x
+                    y_min = 0 if celln_xy[1] - window_y < 0 else celln_xy[1] - window_y
+                    y_max = self.configs["rows"]-1 if celln_xy[1] + window_y >= self.configs["rows"] else celln_xy[1] + window_y
+                    
+                    cell3_xy = (random.randint(x_min, x_max), random.randint(y_min, y_max))
+                    
+                    # Make sure the swap isn't with itself and cell has not already been swapped
+                    while cell3_xy == celln_xy or check_add_cells(cell3, additional_cells):
+                        cell3_xy = (random.randint(x_min, x_max), random.randint(y_min, y_max))
+                        cell3 = self.placement[cell3_xy]
+                        
+                    additional_cells.append({"cell": cell3, "cell_xy": cell3_xy})
+                    
+                print(additional_cells)
+                
+                
+                
             debug_print("Swapping cell {c1} ({x1}, {y1}) with cell {c2} ({x2}, {y2})".format(c1=cell1, c2=cell2, x1=cell1_xy[0], y1=cell1_xy[1], x2=cell2_xy[0], y2=cell2_xy[1]))
             
             # Update placement
-            if not np.isnan(cell2):
-                temp_placement[cell2] = cell1_xy
-            if not np.isnan(cell1):
+            if ripple and not np.isnan(cell2):
                 temp_placement[cell1] = cell2_xy
                 
-            # Check updated cost
-            self.delta_cost = self.calculate_delta_cost(cell1, cell2, temp_placement)
+                temp_placement[cell2] = additional_cells[0]["cell_xy"]
+                cell3 = additional_cells[0]["cell"]
+                debug_print("Swapping cell {c1} ({x1}, {y1}) with cell {c2} ({x2}, {y2})".format(c1=cell2, c2=cell3, x1=cell2_xy[0], y1=cell2_xy[1], x2=additional_cells[0]["cell_xy"][0], y2=additional_cells[0]["cell_xy"][1]))
+                
+                for additional_cell in additional_cells[1:]:
+                    debug_print("Swapping cell {c1} ({x1}, {y1}) with cell {c2} ({x2}, {y2})".format(c1=cell3, c2=additional_cell["cell"], x1=temp_placement[cell3][0], y1=temp_placement[cell3][1], x2=additional_cell["cell_xy"][0], y2=additional_cell["cell_xy"][1]))
+                    temp_placement[cell3] = additional_cell["cell_xy"]
+                    cell3 = additional_cell["cell"]
+                
+                # Check updated cost
+                self.delta_cost = self.calculate_delta_cost(cell1, cell2, temp_placement, additional_cells)
+                
+            else:
+                additional_cells = None
+                if not np.isnan(cell2):
+                    temp_placement[cell2] = cell1_xy
+                if not np.isnan(cell1):
+                    temp_placement[cell1] = cell2_xy
+                    
+                # Check updated cost
+                self.delta_cost = self.calculate_delta_cost(cell1, cell2, temp_placement)
             
             if self.delta_cost < 0:
-                self.update_swap(cell1, cell2, cell1_xy, cell2_xy)
+                self.update_swap(cell1, cell2, cell1_xy, cell2_xy, additional_cells)
                 accepted_swap += 1
                 
             elif self.temperature != 0:
@@ -243,7 +326,7 @@ class SimAnneal:
                 
                 if (r < update_threshold):
                     # Update
-                    self.update_swap(cell1, cell2, cell1_xy, cell2_xy)
+                    self.update_swap(cell1, cell2, cell1_xy, cell2_xy, additional_cells)
                     accepted_swap += 1
                 else:
                     debug_print("Swap rejected")
