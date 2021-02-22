@@ -88,6 +88,7 @@ else:
     
     # Initialize results log
     results_file = "results__{}.txt".format(time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()))
+    initalize_results_file(results_file)
 
     # Get list of benchmark circuits
     circuits = [name for name in os.listdir("./circuits")]
@@ -154,8 +155,9 @@ else:
         cumulative_cost += cost
         
         # Update cost in results log
+        num_iterations = simulated_annealing.iteration
         results_log = open("logs/{}".format(results_file), "a")
-        results_log.write("{circuit}\t{cost}\n".format(circuit=circuit.replace(".txt", ""), cost=cost))
+        results_log.write("{circuit}\t{cost}\t{it}\n".format(circuit=circuit.replace(".txt", ""), cost=cost, it=num_iterations))
         results_log.close()
         
         # Save an image of the output
@@ -167,7 +169,10 @@ else:
 
     # Calculate average cost
     print("Final Average Cost: {}".format(float(cumulative_cost) / len(circuits)))
+    results_log = open("logs/{}".format(results_file), "a")
     results_log.write("\nFinal Average Cost: {}\n".format(float(cumulative_cost) / len(circuits)))
+    results_log.write("Finished at {}\n".format(time.strftime("%Y-%m-%d %H:%M:%S\n", time.localtime())))
+    results_log.close()
     ax.clear()
     
     # Update the GUI with final result

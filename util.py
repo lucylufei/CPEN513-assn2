@@ -1,4 +1,5 @@
 from settings import *
+import time
 
 def debug_print(content):
     '''
@@ -43,10 +44,16 @@ def calculate_half_perimeter(net, cells):
             largest_y = cells[cell][1]
             
     # Calculate half perimenter
-    half_perimeter = (largest_x - smallest_x + 1) + (largest_y - smallest_y + 1)
-    
-    # Add in routing track (only in the vertical dimension)
-    half_perimeter += (largest_y - smallest_y)
+    if "2" in no_assumptions:
+        # No assumption 2
+        half_perimeter = (largest_x - smallest_x + 1) + (largest_y - smallest_y + 1)
+    else:
+        half_perimeter = (largest_x - smallest_x) + (largest_y - smallest_y)
+        
+    # No assumption 1
+    if "1" in no_assumptions:
+        # Add in routing track (only in the vertical dimension)
+        half_perimeter += (largest_y - smallest_y)
     
     debug_print("Half perimeter calculated from ({x1}, {y1}) to ({x2}, {y2}) = {h}".format(x1=smallest_x, y1=smallest_y, x2=largest_x, y2=largest_y, h=half_perimeter))
     return half_perimeter
@@ -129,7 +136,7 @@ def check_add_cells(cell, additional_cells):
 
 def initalize_results_file(filename):
     
-    results_log = open("logs/{}".format(results_file), "w+")
+    results_log = open("logs/{}".format(filename), "w+")
 
     results_log.write("\n\n{}\n".format("="*20))
     results_log.write(time.strftime("%Y-%m-%d %H:%M:%S\n", time.localtime()))
@@ -148,7 +155,9 @@ def initalize_results_file(filename):
     results_log.write("Range Window Size: {}\n".format(window_size))
     results_log.write("Shuffle: {}\n".format(shuffle))
     results_log.write("Ripple: {}\n".format(ripple))
+    results_log.write("No Assumptions: {}\n".format(no_assumptions))
     results_log.write("\n{}\n\n".format("*"*50))
     
+    results_log.write("Circuit\tCost\tIterations\n".format(no_assumptions))
     results_log.close()
     
