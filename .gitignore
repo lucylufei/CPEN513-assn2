@@ -4,4 +4,7 @@ assignment2_handout-1.pdf
 *.err
 *.out
 logs/
+photos/
+temp/
+*.docx
 
