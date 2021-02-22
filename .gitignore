@@ -1,2 +1,7 @@
 __pycache__/
 assignment2_handout-1.pdf
+logs/
+photos/
+temp/
+*.docx
+
