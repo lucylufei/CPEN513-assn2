@@ -1,6 +1,9 @@
+# CPEN 513 - Assignment 2
+
 ## Introduction
 
 This report describes an implementation of Simulated Annealing (SA) for chip placement. The code is available at https://github.com/lucylufei/CPEN513-assn2
+A faster version with no GUI element is in the `no_gui` branch
 
 ## General Implementation
 
@@ -151,7 +154,7 @@ Otherwise, assertions are included throughout the program and exceptions are rai
 
 
 
-# Appendix A
+## Appendix A
 
 ![img](sample1.png)
 
